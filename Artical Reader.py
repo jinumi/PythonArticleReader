@@ -1,32 +1,34 @@
-import pyttsx3
 import requests
 from bs4 import BeautifulSoup
-url = str(input("Paste article url\n"))
+import pyttsx3
 
+# Initialize the pyttsx3 engine
+engine = pyttsx3.init()
 
-def content(url):
-    res = requests.get(url)
-    soup = BeautifulSoup(res.text, 'html.parser')
-    articles = []
-    for i in range(len(soup.select('.p'))):
-        article = soup.select('.p')[i].getText().strip()
-        articles.append(article)
-        contents = " ".join(articles)
-    return contents
+# Prompt the user to enter the URL of the article
+url = input("Enter the URL of the article: ")
 
+# Send an HTTP GET request to the specified URL
+res = requests.get(url)
 
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[0].id)
+# Parse the HTML content of the page using BeautifulSoup
+soup = BeautifulSoup(res.text, 'html.parser')
 
+# Find the <article> element on the page
+article_element = soup.find('article')
 
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+# If the <article> element was not found, print an error message and exit the program
+if article_element is None:
+    print("Error: no article found on the page")
+    exit()
 
+# Extract the text content of the article from the <article> element
+article = article_element.getText().strip()
 
-contents = content(url)
-# print(contents)      ## In case you want to see the content
+# Set the rate and volume of the text-to-speech engine
+engine.setProperty('rate', 150)
+engine.setProperty('volume', 1.0)
 
-# engine.save_to_file
-# engine.runAndWait() ## In case if you want to save the article as a audio file
+# Speak the article aloud using the pyttsx3 engine
+engine.say(article)
+engine.runAndWait()
